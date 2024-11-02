@@ -1,23 +1,51 @@
-import java.util.concurrent.Semaphore;
+    import java.util.concurrent.Semaphore;
 
-public class Generador {
+    public class Generador {
 
-    final static int CAPACIDADTANQUE = 7;
+        /**
+         * @cRojo -> capacidad rojo se inicializa a 7 y será lo
+         *           que indique al camion que no puede recargar mas combustible mediante una espera.
+         *
+         * @cBlanco -> capacidad blanco se inicializa a 7 y será lo
+         *             que indique al camion que no puede recargar mas combustible mediante una espera.
+         *
+         * @nRojo -> nivel que está disponible para la recarga y que será la que coordine directamente
+         *           a los robots para que utilicen el color rojo
+         *
+         * @nBlanco -> nivel que está disponible para la recarga y que será la que coordine directamente
+         *             a los robots para que utilicen el color rojo
+         */
+        public static void main(String[] args) throws InterruptedException {
+            Semaphore nRojo, nBlanco,cBlanco,cRojo;
 
-    public static void main(String[] args) {
-        Semaphore nRojo, nBlanco,cBlanco,cRojo;
+            nRojo = new Semaphore(0);
+            nBlanco = new Semaphore(0);
+            cRojo = new Semaphore(7);
+            cBlanco = new Semaphore(7);
 
-        nRojo = new Semaphore(0);
-        nBlanco = new Semaphore(0);
-        cRojo = new Semaphore(7);
-        cBlanco = new Semaphore(7);
+            RobotTA[] robotsTA = new RobotTA[2];
+            Thread[] robotsTB = new Thread[2];
+            RobotTR reponedor = new RobotTR(nBlanco,cBlanco,nRojo,cRojo);
 
+            for(int i = 0; i<2; i++) {
+                robotsTB[i] = new Thread(new RobotTB(nBlanco,cBlanco,nRojo,cRojo, i));
+                robotsTA[i] = new RobotTA(nBlanco,cBlanco,nRojo,cRojo, i);
+            }
 
+            for(int i = 0; i<2; i++) {
+                robotsTB[i].start();
+                robotsTA[i].start();
+            }
 
+            reponedor.start();
 
-
-
-
-
+            for(int i = 0; i<2; i++) {
+                robotsTB[i].join();
+            }
+            for(int i = 0; i<2; i++) {
+                robotsTA[i].join();
+            }
+            reponedor.detener();
+            reponedor.join();
+        }
     }
-}
