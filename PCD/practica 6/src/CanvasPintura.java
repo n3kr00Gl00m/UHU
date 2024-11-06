@@ -1,10 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CanvasPintura extends JPanel {
 
     private int[] pinturaEnRobotsRosa = new int[2];
     private int[] pinturaEnRobotsGranate = new int[2];
+
+    //private static HashMap<Integer, ArrayList<Character>> registroColores = new HashMap<>(); // Almacena el idRobot y su lista de colores
 
     private int botesDePinturaGranate = 0;
     private int botesDePinturaRosa = 0;
@@ -14,8 +18,8 @@ public class CanvasPintura extends JPanel {
 
     private final int maxPinturaRobot = 3;
     private final int maxNivelTanque = 7; // Máximo nivel de pintura en los tanques
-    private int camionPinturaRoja;
-    private int camionPinturaBlanca;
+    private int camionPinturaRoja = 0;
+    private int camionPinturaBlanca = 0;
 
 
     public CanvasPintura() {
@@ -33,7 +37,7 @@ public class CanvasPintura extends JPanel {
         int tanqueHeight = 200;
         int spacingX = 100;
         int spacingY = 150;
-        int spacingXTanque = 150;
+        int spacingXTanque = 200;
 
         // Dibuja los robots TA
         for (int i = 0; i < 2; i++) {
@@ -79,31 +83,63 @@ public class CanvasPintura extends JPanel {
         // Tanque Blanco
         drawTanque(g, xPositionTanque + tanqueWidth + spacingXTanque, yPositionTanque, tanqueWidth, tanqueHeight, pinturaEnTanqueBlanco, Color.WHITE, "Tanque Blanco");
 
-        // Dibuja los rectángulos que representan la pintura del camión
-        int camionWidth = 40; // Ancho de cada rectángulo
-        int maxCamionHeight = 100; // Altura máxima de los rectángulos
-        int spacingEntreCamiones = 20; // Espacio entre los rectángulos
 
-        // Posiciones X para los rectángulos del camión
-        int camionXRojo = (xPositionTanque + (tanqueWidth / 2)) - (camionWidth + spacingEntreCamiones); // A la izquierda
-        int camionXBlanco = camionXRojo + camionWidth + spacingEntreCamiones; // A la derecha del rojo
+        // Dibuja los camiones con pintura roja y blanca
+        int camionWidth = 40; // Ancho de cada camión
+        int maxCamionHeight = 100; // Altura máxima de cada camión
+        int spacingEntreCamiones = 20; // Espacio entre los camiones
+        int xPositionCamion = xPositionTanque + camionWidth+ (spacingXTanque/3)+ spacingEntreCamiones ;
 
-        // Altura de pintura roja y blanca en el camión
-        int camionRojoHeight = (camionPinturaRoja * maxCamionHeight) / maxNivelTanque;
-        int camionBlancoHeight = (camionPinturaBlanca * maxCamionHeight) / maxNivelTanque;
+        drawCamion(g, xPositionCamion, yPositionTanque, camionWidth, maxCamionHeight,
+                camionPinturaRoja, camionPinturaBlanca, maxNivelTanque,
+                Color.RED, Color.WHITE, "Rojo", "Blanco", spacingEntreCamiones);
 
-        // Dibuja el rectángulo de pintura roja
-        g.setColor(Color.RED);
-        g.fillRect(camionXRojo, yPositionTanque + tanqueHeight - camionRojoHeight, camionWidth, camionRojoHeight);
-
-        // Dibuja el rectángulo de pintura blanca
-        g.setColor(Color.WHITE);
-        g.fillRect(camionXBlanco, yPositionTanque + tanqueHeight - camionBlancoHeight, camionWidth, camionBlancoHeight);
 
         // Mostrar contadores de botes de pintura
         g.drawString("Botes Granate: " + botesDePinturaGranate, xPositionTanque, yPositionTanque + tanqueHeight + 20);
         g.drawString("Botes Rosa: " + botesDePinturaRosa, xPositionTanque + tanqueWidth + spacingXTanque, yPositionTanque + tanqueHeight + 20);
     }
+
+
+    private void drawCamion(Graphics g, int x, int y, int camionWidth, int maxCamionHeight, int nivelPinturaRoja, int nivelPinturaBlanca, int maxNivelTanque, Color colorRojo, Color colorBlanco, String labelRojo, String labelBlanco, int spacingEntreCamiones) {
+        // Posiciones X para los rectángulos del camión
+        int camionXRojo = x; // Posición para el camión rojo
+        int camionXBlanco = x + camionWidth + spacingEntreCamiones; // A la derecha del camión rojo
+
+        // Altura de cada unidad de pintura
+        int unidadAltura = maxCamionHeight / maxNivelTanque;
+
+        // Dibuja los bloques de pintura roja con divisores
+        for (int i = 0; i < nivelPinturaRoja; i++) {
+            int yPos = y + maxCamionHeight - (i + 1) * unidadAltura;
+            g.setColor(colorRojo);
+            g.fillRect(camionXRojo, yPos, camionWidth, unidadAltura);
+
+            // Línea divisoria
+            g.setColor(Color.DARK_GRAY);
+            g.drawLine(camionXRojo, yPos, camionXRojo + camionWidth, yPos);
+        }
+
+        // Dibuja los bloques de pintura blanca con divisores
+        for (int i = 0; i < nivelPinturaBlanca; i++) {
+            int yPos = y + maxCamionHeight - (i + 1) * unidadAltura;
+            g.setColor(colorBlanco);
+            g.fillRect(camionXBlanco, yPos, camionWidth, unidadAltura);
+
+            // Línea divisoria
+            g.setColor(Color.DARK_GRAY);
+            g.drawLine(camionXBlanco, yPos, camionXBlanco + camionWidth, yPos);
+        }
+
+        // Bordes y etiquetas de los niveles de pintura
+        g.setColor(Color.BLACK);
+        g.drawRect(camionXRojo, y, camionWidth, maxCamionHeight);
+        g.drawRect(camionXBlanco, y, camionWidth, maxCamionHeight);
+
+        g.drawString(labelRojo + ": " + nivelPinturaRoja, camionXRojo, y - 5);
+        g.drawString(labelBlanco + ": " + nivelPinturaBlanca, camionXBlanco, y - 5);
+    }
+
 
     private void drawTanque(Graphics g, int x, int y, int width, int height, int nivelPintura, Color colorPintura, String label) {
         // Fondo gris para el tanque

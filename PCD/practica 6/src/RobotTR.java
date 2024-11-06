@@ -25,6 +25,10 @@ public class RobotTR extends Thread {
     public void run() {
         while (!parar) {
             try {
+                //Ponemos la espera aquí y no al final para que los tanques no aparezcan rellenos "previamente"
+                Thread.sleep((rd.nextInt(4) + 2) * 1000);
+
+
                 //Pintar camion
                 int cantidadBlanco = rd.nextInt(4) + 3;
                 int cantidadRojo = rd.nextInt(4) + 3;
@@ -47,8 +51,7 @@ public class RobotTR extends Thread {
                     nRojo.release();
                 }
 
-                // Esperar
-                Thread.sleep((rd.nextInt(4) + 2) * 1000);
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
